@@ -1,0 +1,90 @@
+/**
+ * You can edit, run, and share this code. 
+ * play.kotlinlang.org 
+ */
+import  java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.DayOfWeek;
+fun main() {
+
+    var analyzer = OrdersAnalyzer();
+    var orders = analyzer.init();
+    var result = analyzer.totalDailySales(orders);
+
+    println(result);
+
+}
+
+class OrdersAnalyzer {
+    
+     fun init(): List<Order> {
+         
+        var collection = listOf(
+            Order(554, LocalDateTime.parse("2017-03-25T10:35:20"), listOf(
+                OrderLine(9872, "Pencil", 3,  BigDecimal.valueOf(3.00))
+           		 )
+           ),
+            Order(555, LocalDateTime.parse("2017-03-25T11:24:20"), listOf(
+                OrderLine( 9872,  "Pencil",  2,  BigDecimal.valueOf(3.00)),
+                OrderLine( 1746,  "Eraser",  1,  BigDecimal.valueOf(1.00))
+           		 )
+           ),
+           
+            Order(453, LocalDateTime.parse("2017-03-27T14:53:12"), listOf(
+                OrderLine( 5723,  "Pen",  4, BigDecimal.valueOf( 4.22)),
+                OrderLine(9872,  "Pencil",  3,BigDecimal.valueOf(  3.12)),
+                OrderLine( 3433,  "Erasers Set",  1, BigDecimal.valueOf( 6.15))
+           		 )
+           ),
+            Order(431, LocalDateTime.parse("2017-03-20T12:15:02"), listOf(
+                OrderLine( 5723,  "Pen",  7, BigDecimal.valueOf(4.22)),
+                OrderLine( 3433,  "Erasers Set",  2,  BigDecimal.valueOf(6.15))
+           		 )
+           ),
+            Order(690, LocalDateTime.parse("2017-03-26T11:14:00"), listOf(
+                OrderLine( 9872,  "Pencil",  4,  BigDecimal.valueOf(3.12)),
+                OrderLine( 4098,  "Marker",  5,  BigDecimal.valueOf(4.50))
+           		 )
+           )
+        
+        
+        );
+        
+        return collection;
+    }
+    
+    data class Order(val orderId: Int, val creationDate: LocalDateTime, val orderLines: List<OrderLine>);
+
+
+    data class OrderLine(val productId: Int, val name: String, val quantity: Int, val unitPrice: BigDecimal);
+
+
+    fun totalDailySales(orders: List<Order>): Map<DayOfWeek, Int> {
+
+        var dailySalesMap =  HashMap<DayOfWeek, Int>();
+      
+        //holds every order sum info. 
+        var orderTuple:Pair<DayOfWeek, Int>
+        
+        for (order in orders) {
+                orderTuple = getDaySalesTuples(order);
+            	var oldValue = dailySalesMap.get(orderTuple.first);
+           		 dailySalesMap.set(orderTuple.first,oldValue ?: 0 + orderTuple.second)
+        }
+        
+        return dailySalesMap;
+
+    }
+    
+    //create a pair of dayofweek to number of orders in one specific order. 
+    fun getDaySalesTuples(order:Order) : Pair<DayOfWeek, Int>{
+        return Pair(order.creationDate.dayOfWeek,extractOrders(order.orderLines));
+    }
+
+    //loops through the orderLines and sum the number of products.
+    fun extractOrders(orderLines : List<OrderLine>) : Int{
+         val totalOrdersInADay: Int = orderLines.sumBy { it.quantity }
+         return totalOrdersInADay;
+    }
+
+}
